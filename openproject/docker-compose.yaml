@@ -1,0 +1,122 @@
+networks:
+  backend:
+
+volumes:
+  pgdata:
+  opdata:
+
+x-op-restart-policy: &restart_policy
+  restart: unless-stopped
+
+x-op-image: &image
+  image: openproject/openproject:${TAG}
+
+x-op-app: &app
+  <<: [*image, *restart_policy]
+  environment:
+    OPENPROJECT_EDITION: "bim"
+    OPENPROJECT_HTTPS: "${OPENPROJECT_HTTPS}"
+    OPENPROJECT_HOST__NAME: "${OPENPROJECT_HOST__NAME}"
+    OPENPROJECT_ADDITIONAL__HOST__NAMES: "web" # to allow access from hocuspocus directly
+    OPENPROJECT_HSTS: "${OPENPROJECT_HSTS}"
+    OPENPROJECT_RAILS__CACHE__STORE: "memcache"
+    OPENPROJECT_CACHE__MEMCACHE__SERVER: "cache:11211"
+    OPENPROJECT_RAILS__RELATIVE__URL__ROOT: "${OPENPROJECT_RAILS__RELATIVE__URL__ROOT:-}"
+    OPENPROJECT_RAILS__TRUSTED__PROXIES: "${OPENPROJECT_RAILS__TRUSTED__PROXIES}"
+    OPENPROJECT_COLLABORATIVE__EDITING__HOCUSPOCUS__URL: "${COLLABORATIVE_SERVER_URL}"
+    OPENPROJECT_COLLABORATIVE__EDITING__HOCUSPOCUS__SECRET: "${COLLABORATIVE_SERVER_SECRET}"
+    DATABASE_URL: "${DATABASE_URL}"
+    SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
+    # set to true to enable the email receiving feature. See ./docker/cron for more options
+    IMAP_ENABLED: "${IMAP_ENABLED}"
+    RAILS_MIN_THREADS: "${RAILS_MIN_THREADS}"
+    RAILS_MAX_THREADS: "${RAILS_MAX_THREADS}"
+  volumes:
+    - "${OPDATA}:/var/openproject/assets"
+
+services:
+  db:
+    image: postgres:${POSTGRES_VERSION}
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: openproject
+    volumes:
+      - "${PGDATA}:/var/lib/postgresql/data"
+    networks:
+      - backend
+
+  cache:
+    image: memcached
+    restart: unless-stopped
+    networks:
+      - backend
+
+  seeder:
+    <<: *app
+    command: "./docker/prod/seeder"
+    restart: on-failure
+    networks:
+      - backend
+
+  web:
+    <<: *app
+    command: "./docker/prod/web"
+    hostname: "${OPENPROJECT_HOST__NAME}"
+    ports:
+      - "8083:8080"
+    depends_on:
+      - db
+      - cache
+      - seeder
+    networks:
+      - backend
+    labels:
+      - autoheal=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080${OPENPROJECT_RAILS__RELATIVE__URL__ROOT:-}/health_checks/default"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_START_PERIOD: 600
+      AUTOHEAL_INTERVAL: 30
+
+  worker:
+    <<: *app
+    command: "./docker/prod/worker"
+    depends_on:
+      - db
+      - cache
+      - seeder
+    networks:
+      - backend
+
+  cron:
+    <<: *app
+    command: "./docker/prod/cron"
+    depends_on:
+      - db
+      - cache
+      - seeder
+    networks:
+      - backend
+
+  hocuspocus:
+    image: openproject/hocuspocus:17.5.0
+    restart: unless-stopped
+    environment:
+      SECRET: "${COLLABORATIVE_SERVER_SECRET}"
+      OPENPROJECT_URL: "http://web:8080"
+      OPENPROJECT_HTTPS: "${OPENPROJECT_HTTPS}"
+    depends_on:
+      - web
+    networks:
+      - backend

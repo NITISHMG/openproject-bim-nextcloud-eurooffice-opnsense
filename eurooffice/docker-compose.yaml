@@ -1,0 +1,63 @@
+###### Euro-Office ######
+# ============================================================
+# TLS terminated at OPNsense HAProxy (ACME certs)
+# HAProxy → VM_IP:9980 (HTTP) → this container
+# All secrets in .env | All data in bind-mount paths
+# ============================================================
+services:
+
+  eurooffice:
+    image: ghcr.io/euro-office/documentserver:v9.3.1
+    container_name: eurooffice_documentserver
+    restart: unless-stopped
+    ports:
+      - "9980:80"
+    environment:
+      #JWT — must match what Nextcloud eurooffice app uses
+      JWT_ENABLED: "true"
+      JWT_SECRET:  ${JWT_SECRET}
+      JWT_HEADER:  Authorization
+      JWT_IN_BODY: "false"
+
+      # WOPI (Nextcloud talks to DS via WOPI)
+      WOPI_ENABLED: "true"
+
+      # Allow internal/private IPs (needed for Nextcloud LAN)
+      ALLOW_PRIVATE_IP_ADDRESS: "true"
+      ALLOW_META_IP_ADDRESS:    "false"
+
+      #Admin panel
+      ADMINPANEL_ENABLED: "true"
+
+      #Fonts regeneration on start
+      GENERATE_FONTS: "true"
+
+      #Do NOT enable example — production only
+      EXAMPLE_ENABLED: "false"
+
+      #Co-editing limits (tune to your user count)
+      # Each document uses ~200MB RAM during active editing
+      # Formula: max_concurrency = (total_RAM_MB - 1024) / 200
+      # For 8GB VM: (8192 - 1024) / 200 ≈ 35
+      CO_EDITING_LIMIT: "20"
+    volumes:
+      # Persistent data — survive container restarts/upgrades
+      - /docker/eurooffice/data/documentserver/logs:/var/log/onlyoffice
+      - /docker/eurooffice/data/documentserver/data:/var/www/onlyoffice/Data
+      - /docker/eurooffice/data/documentserver/lib:/var/lib/onlyoffice
+      - eurooffice_db:/var/lib/postgresql
+    networks:
+      - nextcloud_backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/hosting/discovery"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  eurooffice_db:
+networks:
+  nextcloud_backend:
+    external: true

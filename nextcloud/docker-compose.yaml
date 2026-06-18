@@ -1,0 +1,141 @@
+# ============================================================
+# TLS terminated at OPNsense HAProxy (ACME certs)
+# HAProxy → VM_IP:8085 (HTTP plain) → this stack
+# All secrets in .env | All data in bind-mount paths
+# ============================================================
+services:
+  db:
+    image: mariadb:11.4
+    container_name: nextcloud_db
+    restart: unless-stopped
+    command: >
+      --transaction-isolation=READ-COMMITTED
+      --log-bin=binlog
+      --binlog-format=ROW
+      --innodb-buffer-pool-size=512M
+      --innodb-log-file-size=128M
+      --innodb-flush-log-at-trx-commit=1
+      --innodb-file-per-table=ON
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --max-connections=200
+      --wait-timeout=28800
+      --skip-name-resolve
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE:      ${DB_NAME}
+      MYSQL_USER:          ${DB_USER}
+      MYSQL_PASSWORD:      ${DB_PASSWORD}
+    volumes:
+      - /docker/nextcloud/data/mariadb:/var/lib/mysql
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: redis:7-alpine
+    container_name: nextcloud_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass "${REDIS_PASSWORD}"
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --loglevel warning
+    volumes:
+      - /docker/nextcloud/data/redis:/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+  app:
+    image: nextcloud:33.0.5-apache
+    container_name: nextcloud_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8085:80"
+    environment:
+      MYSQL_HOST:     db
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER:     ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+      NEXTCLOUD_ADMIN_USER:     ${NC_ADMIN_USER}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD}
+
+      NEXTCLOUD_TRUSTED_DOMAINS: ${NC_DOMAIN}
+      NEXTCLOUD_DATA_DIR:        /var/www/html/data
+
+      # Critical: tells NC it is behind HTTPS proxy
+      OVERWRITEPROTOCOL: https
+      OVERWRITECLIURL:   https://${NC_DOMAIN}
+      TRUSTED_PROXIES:   ${HAPROXY_LAN_IP}
+
+      REDIS_HOST:          redis
+      REDIS_HOST_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST_PORT:     6379
+
+      PHP_MEMORY_LIMIT: 1G
+      PHP_UPLOAD_LIMIT: 10G
+
+        #SMTP_HOST:         ${SMTP_HOST}
+        #SMTP_PORT:         ${SMTP_PORT}
+        #SMTP_SECURE:       ${SMTP_SECURE}
+        #SMTP_NAME:         ${SMTP_USER}
+        #SMTP_PASSWORD:     ${SMTP_PASSWORD}
+        #MAIL_FROM_ADDRESS: ${MAIL_FROM}
+        #MAIL_DOMAIN:       ${NC_DOMAIN}
+    volumes:
+      - /docker/nextcloud/data/nextcloud-html:/var/www/html
+      - /docker/nextcloud/data/nextcloud-data:/var/www/html/data
+      - /docker/nextcloud/config/nextcloud/php.ini:/usr/local/etc/php/conf.d/zzz-custom.ini:ro
+      - /docker/nextcloud/config/nextcloud/apache.conf:/etc/apache2/conf-enabled/zzz-custom.conf:ro
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/status.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    security_opt:
+      - no-new-privileges:true
+
+  cron:
+    image: nextcloud:33.0.5-apache
+    container_name: nextcloud_cron
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    entrypoint: /cron.sh
+    volumes:
+      - /docker/nextcloud/data/nextcloud-html:/var/www/html
+      - /docker/nextcloud/data/nextcloud-data:/var/www/html/data
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  backend:
+    driver: bridge
