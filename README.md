@@ -29,16 +29,21 @@ BCF + IFC Viewer
 ```
 mkdir -p /path/to/nextcloud/config/nextcloud
 mkdir -p /path/to/nextcloud/data/{mariadb,redis,nextcloud-html,nextcloud-data}
-chown -R www-data:www-data /path/to/nextcloud
-find /path/to/nextcloud/ -type d -exec chmod 750 {} \;
-find /path/to/nextcloud/ -type f -exec chmod 640 {} \;
-```
-change example.env to .env and change values. Also copy apache.conf, php.ini and procede with 
-```
+#change example.env to .env and change values. Also copy apache.conf, php.ini and procede with 
+cd /path/to/nextcloud
+chown -R 33:33 /path/to/nextcloud/data/nextcloud-html
+chown -R 33:33 /path/to/nextcloud/data/nextcloud-data
 docker compose up -d
 ```
-Configure HAProxy backend, frontend, SSL certificate, and domain mapping to publish the application and access it using: https://nextcloud.example.com
-
+  Configure HAProxy backend, frontend, SSL certificate, and domain mapping to publish the application and access it using: https://nextcloud.example.com
+  Access Nextcloud UI and Install nextcloud by providing user and password.
+```
+# post install
+docker exec -u www-data nextcloud_app php occ background:cron
+docker exec -u www-data nextcloud_app php occ db:add-missing-indices
+docker exec -u www-data nextcloud_app php occ db:convert-filecache-bigint
+docker exec -u www-data nextcloud_app php occ config:system:set default_phone_region --value=IN
+```
 2. Deploy Euro-Office
 
    To deploy Euro-Office, create the directory structure and generate JWT secret and deploy
@@ -72,20 +77,55 @@ mkdir -p /path/to/openproject/postgresql
 chown -R 1000:1000 /path/to/openproject/assets
 chown -R 999:999 /path/to/openproject/postgresql
 ```
-Changing example.env to .env and update and Run docker compose up -d
-Configure HAProxy backend, frontend, SSL certificate, and domain mapping to publish the application and access it using: https://openprojectbim.example.com
-Make sure put following header in OPNsense HAproxy setting Option pass-through:  
+  Changing example.env to .env and update and Run docker compose up -d
+  Configure HAProxy backend, frontend, SSL certificate, and domain mapping to publish the application and access it using: https://openprojectbim.example.com
+  Make sure put following header in OPNsense HAproxy setting Option pass-through:  
 ```
 http-request set-header X-Forwarded-Proto https
 http-request set-header X-Forwarded-Port 443
 http-request set-header X-Forwarded-Host openprojectbim.example.com
 http-request set-header Host openprojectbim.example.com
 ```
+Login with default user: admin and passwd: admin then reset strong_password
+
 3a. Nextcloud and OpenProjectBIM Intigration
+  
   To intigrate Nextcloud with OpenProjectBIM
 ```
 Go to nextcloud >> Admin >> Apps >> search OpenProject >> Download and enable
-Next Administration settings >> OpenProject >>
-1 OpenProject server: https://openprojectbim.example.com
+Go to OpenProjectBIM >>  Administration >> Files >> External file storages
+Name: Filestorage_name
+Host: https://my-file-storage.com
+Authentication Method: Two-way OAuth 2.0 authorization code flow
+Save and continue 
+# copy OpenProject OAuth Client ID  and OpenProject OAuth Client Secret  which we use in nextcloud
 
+Next Administration settings >> OpenProject
+1 OpenProject server: https://openprojectbim.example.com
+save
+2 Authentication method
+select: Two-way OAuth 2.0 authorization code flow   and save
+3. OpenProject OAuth settings
+OpenProject OAuth client ID: past_Oauth_from_openproject_to_here
+OpenProject OAuth client secret: past_Oauth_from_openproject_to_here
+4. Nextcloud OAuth client
+copy Nextcloud OAuth client ID and Nextcloud OAuth client secret which we past in Openproject
+# On OpenProject past 
+Nextcloud OAuth Client ID:
+Nextcloud OAuth Client Secret:
+Save and continue
+# On nextcloud: Yes, I have copied these values
+5. Project folders (recommended)
+click Automatically managed folders and Setup OpenProject user, group and folder
+6. Project folders application connection
+Copy Application Password from nextcloud
+# On Openproject
+Application password: past here and Finish setup
+
+# On Openproject >> Administration >> Files >> nextcloud >> Projects >> Add projects >> Login to Nextcloud >> Grant access >> Put nextcloud admin password
+Access granted
+# On nextcloud you will see Shared folder as OpenProject
 ```
+
+4. Sample Construction Project
+   
