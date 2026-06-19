@@ -127,5 +127,36 @@ Access granted
 # On nextcloud you will see Shared folder as OpenProject
 ```
 
-4. Sample Construction Project
+## Sample Construction Project Workflow
+To demonstrate how OpenProjectBIM and Nextcloud can be used throughout the complete lifecycle of a construction project management
+
+4. The Project is divided into the following phases:
+```
+| Phase                | Start Date | Finish Date | Main Work                                                  |
+| -------------------- | ---------- | ----------- | ---------------------------------------------------------- |
+| 01_Foundation        | 2026-07-01 | 2026-07-10  | Site survey, excavation, footing, foundation concrete      |
+| 02_GroundFloorSlab   | 2026-07-11 | 2026-07-20  | Formwork, reinforcement, concrete pouring, curing          |
+| 03_StructuralFrame   | 2026-07-21 | 2026-08-15  | Columns, beams, slabs, structural inspection               |
+| 04_MasonryPlastering | 2026-08-16 | 2026-08-31  | Block work, internal and external plastering               |
+| 05_MEPInstallation   | 2026-09-01 | 2026-09-15  | Electrical, plumbing, fire protection, HVAC                |
+| 06_FloorFinish       | 2026-09-16 | 2026-09-25  | Flooring, ceiling, painting, doors and windows             |
+| 07_Final             | 2026-09-26 | 2026-09-30  | Quality inspection, defect fixing, documentation, handover |
+```
+4a. To create project management flow on OpenProjectBIM: 
+```
+Project >> New Project >> 
+Name: Building Construction Project
+Identifier: building-construction-project
+Descritption: building-construction-project management by OpenProjectBIM  
+Complete
+```
+4b. To connect Nextcloud to this Project
+```   
+   Building Construction Project >> Project settings >> Files >> +Storage >> Save
+```
+4c. To Create new work package
+```
+Building Construction Project >> work packages >> Create new work package
+```  
+
    
