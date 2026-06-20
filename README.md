@@ -8,6 +8,14 @@ EuroOffice for online document editing
 OPNsense HAProxy for secure external access & HAProxy
 Docker Compose for application deployment and management
 
+![OpenProject](https://img.shields.io/badge/OpenProject-BIM-blue?logo=openproject)
+![IFC](https://img.shields.io/badge/IFC-BIM-purple)
+![Nextcloud](https://img.shields.io/badge/Nextcloud-Storage-0082C9?logo=nextcloud)
+![EuroOffice](https://img.shields.io/badge/EuroOffice-Document%20Editing-green)
+![OPNsense](https://img.shields.io/badge/OPNsense-HAProxy-orange)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
+
+
 ## Architecture
 ```text
 Users
@@ -174,4 +182,8 @@ Building Construction Project >> BCF >> IFC modeles >> choose File >> create >> 
 ```
 ![openprojectBIM-IFC_files](Images/ifc.png)
 
-   
+
+## Reference
+- [OpenProject Documentation](https://www.openproject.org/docs/)
+- [OpenProject Docker Compose](https://github.com/opf/openproject-docker-compose)
+- [Nextcloud Official Docs](https://docs.nextcloud.com/server/latest/admin_manual/) 
