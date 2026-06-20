@@ -155,9 +155,11 @@ Complete
 ```   
    Building Construction Project >> Project settings >> Files >> +Storage >> Save
 ```
-4c. To Create new work package
+4c. To Create new work package and represent with Gantt charts
 ```
-Building Construction Project >> work packages >> Create new work package
-```  
+Building Construction Project >> work packages >> Create new work package 
+```
+![openprojectBIM-Gantt chart](Images/BCP_Ganttcharts.png)
+
 
    
