@@ -132,15 +132,16 @@ To demonstrate how OpenProjectBIM and Nextcloud can be used throughout the compl
 
 4. The Project is divided into the following phases:
 ```
-| Phase                | Start Date | Finish Date | Main Work                                                  |
-| -------------------- | ---------- | ----------- | ---------------------------------------------------------- |
-| 01_Foundation        | 2026-07-01 | 2026-07-10  | Site survey, excavation, footing, foundation concrete      |
-| 02_GroundFloorSlab   | 2026-07-11 | 2026-07-20  | Formwork, reinforcement, concrete pouring, curing          |
-| 03_StructuralFrame   | 2026-07-21 | 2026-08-15  | Columns, beams, slabs, structural inspection               |
-| 04_MasonryPlastering | 2026-08-16 | 2026-08-31  | Block work, internal and external plastering               |
-| 05_MEPInstallation   | 2026-09-01 | 2026-09-15  | Electrical, plumbing, fire protection, HVAC                |
-| 06_FloorFinish       | 2026-09-16 | 2026-09-25  | Flooring, ceiling, painting, doors and windows             |
-| 07_Final             | 2026-09-26 | 2026-09-30  | Quality inspection, defect fixing, documentation, handover |
+| Phase                | Start Date | Finish Date | Main Work                                             |
+| -------------------- | ---------- | ----------- | ----------------------------------------------------- |
+| 00_Planning          | 2026-06-01 | 2026-06-30  | Site survey, design review, layout marking, approvals |
+| 01_Foundation        | 2026-07-01 | 2026-07-20  | Excavation, footing, foundation concrete              |
+| 02_GroundFloorSlab   | 2026-07-21 | 2026-08-05  | Formwork, reinforcement, concrete pouring             |
+| 03_StructuralFrame   | 2026-08-06 | 2026-09-25  | Columns, beams, slabs                                 |
+| 04_MasonryPlastering | 2026-09-26 | 2026-10-20  | Block work, plastering                                |
+| 05_MEPInstallation   | 2026-10-21 | 2026-11-15  | Electrical, plumbing, HVAC                            |
+| 06_FloorFinish       | 2026-11-16 | 2026-12-05  | Flooring, painting, doors and windows                 |
+| 07_Final             | 2026-12-06 | 2026-12-15  | Inspection, documentation, handover                   |
 ```
 4a. To create project management flow on OpenProjectBIM: 
 ```
