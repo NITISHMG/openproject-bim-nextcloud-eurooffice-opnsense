@@ -155,11 +155,23 @@ Complete
 ```   
    Building Construction Project >> Project settings >> Files >> +Storage >> Save
 ```
-4c. To Create new work package and represent with Gantt charts
+4c. To Create new work package
 ```
 Building Construction Project >> work packages >> Create new work package 
 ```
-![openprojectBIM-Gantt chart](Images/BCP_Ganttcharts.png)
+![openprojectBIM-work_package](Images/workpackage.png)
 
+4d. To and represent with Gantt charts
+```
+Building Construction Project >> Gantt charts
+```
+![openprojectBIM-Gantt_chart](Images/ganttcharts.png)
+
+4e. To View BIM Collaboration Formate (BCF) 
+```
+TO view BCF we need to upload IFC files as follows:  
+Building Construction Project >> BCF >> IFC modeles >> choose File >> create >> Load all and select
+```
+![openprojectBIM-IFC_files](Images/ifc.png)
 
    
