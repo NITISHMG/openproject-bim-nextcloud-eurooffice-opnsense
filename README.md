@@ -134,6 +134,7 @@ Application password: past here and Finish setup
 Access granted
 # On nextcloud you will see Shared folder as OpenProject
 ```
+![openprojectBIM_nextcloud_shared_folder](Images/shared_folder.png)
 
 ## Sample Construction Project Workflow
 To demonstrate how OpenProjectBIM and Nextcloud can be used throughout the complete lifecycle of a construction project management
@@ -163,6 +164,7 @@ Complete
 ```   
    Building Construction Project >> Project settings >> Files >> +Storage >> Save
 ```
+![openprojectBIM-ifc-link-nextcloud](Images/ifc-link-nextcloud.png)
 4c. To Create new work package
 ```
 Building Construction Project >> work packages >> Create new work package 
