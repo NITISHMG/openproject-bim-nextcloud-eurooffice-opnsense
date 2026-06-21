@@ -30,7 +30,7 @@ Tasks/Gantt          DWG/PDF/IFC Files
   ↓
 BCF + IFC Viewer
 ```
-## Deployent Guide
+## Deployment Guide
 1. Deploy Nextcloud
    
    To deploy Nextcloud on VM, create the directory structure and adjust the file ownership and permissions as follows:
@@ -64,7 +64,7 @@ http-request set-header X-Forwarded-Proto https
 http-request set-header X-Forwarded-Host eurooffice.example.com
 http-request set-header X-Forwarded-For %[src]
 ```
-2a. Nextcloud and Euro-Office Intigration
+2a. Nextcloud and Euro-Office Integration
  
    To intigrate Nextcloud with Euro-Office
 ```
@@ -96,7 +96,7 @@ http-request set-header Host openprojectbim.example.com
 ```
 Login with default user: admin and passwd: admin then reset strong_password
 
-3a. Nextcloud and OpenProjectBIM Intigration
+3a. Nextcloud and OpenProjectBIM Integration
   
   To intigrate Nextcloud with OpenProjectBIM
 ```
